@@ -2,9 +2,65 @@
 <html>
 <head>
 <title>LINE</title>
+
+<style>
+#intro{
+  position:fixed;
+  inset:0;
+  background:#030611;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+.intro-text{
+  font-size:22px;
+  letter-spacing:4px;
+  color:#8ccfff;
+  opacity:0;
+  animation:fadeIn 2s ease forwards;
+}
+
+@keyframes fadeIn{
+  to{
+    opacity:1;
+  }
+}
+</style>
+
+</head>
+<title>LINE</title>
 </head>
 <body>
-<h1>LINE</h1>
-<p>Creative Video Editing</p>
+
+<!-- 🔥 ИНТРО -->
+<div id="intro">
+  <div class="intro-text">INITIALIZING VISUAL SYSTEM...</div>
+</div>
+
+<!-- 🌌 ОСНОВНОЙ САЙТ -->
+<div id="app" style="display:none;">
+
+  <h1>LINE</h1>
+  <p>Creative Video Editing</p>
+
+</div>
+
 </body>
 </html>
+<script>
+const intro = document.getElementById("intro");
+const app = document.getElementById("app");
+
+setTimeout(() => {
+  intro.style.opacity = "0";
+  intro.style.transition = "2.5s ease";
+
+  setTimeout(() => {
+    intro.remove();
+    app.style.display = "block";
+  }, 2500);
+
+}, 3500);
+</script>
