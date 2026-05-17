@@ -1,343 +1,368 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LINE | Experience</title>
+
+<title>LINE | Video Editor</title>
 
 <style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
 body{
-  margin:0;
-  background:#030611;
-  color:white;
-  font-family:Arial, sans-serif;
-  overflow-x:hidden;
+background:#020510;
+color:white;
+overflow-x:hidden;
 }
 
-/* 🌌 BACKGROUND */
 canvas{
-  position:fixed;
-  inset:0;
-  z-index:-1;
+position:fixed;
+inset:0;
+z-index:-1;
 }
 
-/* 🔥 INTRO */
-#intro{
-  position:fixed;
-  inset:0;
-  background:#030611;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:99999;
-}
-
-.intro-text{
-  font-size:20px;
-  letter-spacing:4px;
-  color:#8ccfff;
-  opacity:0;
-  animation:fadeIn 2s ease forwards;
-}
-
-@keyframes fadeIn{
-  to{opacity:1;}
-}
-
-/* 🎬 APP */
-#app{
-  display:none;
-}
-
-/* HERO */
 .hero{
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  position:relative;
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+text-align:center;
 }
 
-.line-logo{
-  font-size:110px;
-  letter-spacing:18px;
-  color:#8ccfff;
-  opacity:0;
-  transform:translateY(20px);
-  animation:logoIn 2.5s ease forwards;
-  animation-delay:0.3s;
-  text-shadow:0 0 30px rgba(140,207,255,0.35);
+.glass{
+
+background:rgba(255,255,255,.08);
+
+backdrop-filter:blur(20px);
+
+border:1px solid rgba(255,255,255,.1);
+
+padding:40px;
+
+border-radius:32px;
+
+max-width:800px;
+
+animation:float 6s infinite ease-in-out;
+
 }
 
-@keyframes logoIn{
-  0%{
-    opacity:0;
-    transform:translateY(20px);
-    filter:blur(10px);
-  }
-  100%{
-    opacity:1;
-    transform:translateY(0);
-    filter:blur(0px);
-  }
-}
-
-.subtitle{
-  opacity:0.7;
-  margin-top:10px;
-  letter-spacing:1px;
-}
-
-/* BUTTONS */
-.btn{
-  margin-top:25px;
-  padding:12px 24px;
-  border:1px solid #8ccfff;
-  background:transparent;
-  color:#8ccfff;
-  cursor:pointer;
-  border-radius:10px;
-  transition:0.3s;
-}
-
-.btn:hover{
-  background:#8ccfff;
-  color:#030611;
-  transform:scale(1.05);
-}
-
-/* 🧭 SECTIONS (scroll experience) */
-section{
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:60px 20px;
+h1{
+font-size:80px;
+margin-bottom:10px;
 }
 
 h2{
-  color:#8ccfff;
-  letter-spacing:2px;
-  margin-bottom:30px;
+margin-bottom:20px;
 }
 
-/* 🎞 CARDS */
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:20px;
-  width:100%;
-  max-width:1100px;
+.subtitle{
+opacity:.8;
+margin-bottom:20px;
+}
+
+.telegram{
+
+display:inline-block;
+
+padding:12px 20px;
+
+background:rgba(120,180,255,.15);
+
+border-radius:16px;
+
+text-decoration:none;
+
+color:white;
+
+}
+
+section{
+padding:80px 20px;
+}
+
+.grid{
+
+display:grid;
+
+grid-template-columns:
+repeat(
+auto-fit,
+minmax(260px,1fr)
+);
+
+gap:20px;
+
 }
 
 .card{
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.1);
-  padding:70px 20px;
-  border-radius:18px;
-  cursor:pointer;
-  transition:0.4s;
-  backdrop-filter:blur(10px);
-  position:relative;
-  overflow:hidden;
+
+background:
+rgba(255,255,255,.06);
+
+padding:90px 20px;
+
+border-radius:24px;
+
+backdrop-filter:blur(20px);
+
+transition:.4s;
+
 }
 
 .card:hover{
-  transform:translateY(-12px) scale(1.03);
-  box-shadow:0 0 40px rgba(140,207,255,0.25);
+
+transform:
+translateY(-8px);
+
+box-shadow:
+0 0 30px
+rgba(
+120,
+180,
+255,
+.2
+);
+
 }
 
-/* glow */
-.card::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:radial-gradient(circle at center, rgba(140,207,255,0.25), transparent 70%);
-  opacity:0;
-  transition:0.4s;
-}
-
-.card:hover::after{
-  opacity:1;
-}
-
-/* 🎥 FULLSCREEN MODAL */
-#modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.9);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:99999;
-  flex-direction:column;
-}
-
-#modal video{
-  width:80%;
-  max-width:900px;
-  border-radius:12px;
-}
-
-#close{
-  margin-top:20px;
-  color:#8ccfff;
-  cursor:pointer;
-}
-
-/* 🔚 FOOTER */
 footer{
-  padding:100px;
-  text-align:center;
-  opacity:0.6;
+
+padding:60px;
+
+text-align:center;
+
+opacity:.7;
+
 }
+
+@keyframes float{
+
+50%{
+
+transform:
+translateY(-10px);
+
+}
+
+}
+
 </style>
+
 </head>
 
 <body>
 
-<!-- 🌌 BACKGROUND -->
 <canvas id="bg"></canvas>
 
-<!-- 🔥 INTRO -->
-<div id="intro">
-  <div class="intro-text">INITIALIZING VISUAL SYSTEM...</div>
-</div>
+<section class="hero">
 
-<!-- 🎬 APP -->
-<div id="app">
+<div class="glass">
 
-  <!-- HERO -->
-  <div class="hero">
-    <h1 class="line-logo">LINE</h1>
-    <div class="subtitle">Creative Video Editing • Motion • Short Form Content</div>
-    <button class="btn" onclick="scrollToSection('works')">Enter Experience</button>
-  </div>
+<h1>
+LINE
+</h1>
 
-  <!-- WORKS -->
-  <section id="works">
-    <h2>Horizontal Edits</h2>
-    <div class="cards">
-      <div class="card" onclick="openVideo()">Project 01</div>
-      <div class="card" onclick="openVideo()">Project 02</div>
-      <div class="card" onclick="openVideo()">Project 03</div>
-    </div>
-  </section>
+<div class="subtitle">
 
-  <section>
-    <h2>Vertical Edits</h2>
-    <div class="cards">
-      <div class="card" onclick="openVideo()">Vertical 01</div>
-      <div class="card" onclick="openVideo()">Vertical 02</div>
-      <div class="card" onclick="openVideo()">Vertical 03</div>
-    </div>
-  </section>
-
-  <footer>
-    END OF TRANSMISSION<br><br>
-    LINE // VIDEO EDITOR
-  </footer>
+Creative Video Editing • Motion • Short Form Content
 
 </div>
 
-<!-- 🎥 MODAL -->
-<div id="modal">
-  <video controls></video>
-  <div id="close" onclick="closeVideo()">CLOSE EXPERIENCE</div>
+<a
+class="telegram"
+href="https://t.me/line_editor"
+>
+
+Telegram
+
+</a>
+
 </div>
+
+</section>
+
+<section>
+
+<h2>
+
+Horizontal Edits
+
+</h2>
+
+<div class="grid">
+
+<div class="card">
+
+Featured Edit
+
+</div>
+
+<div class="card">
+
+Project 02
+
+</div>
+
+</div>
+
+</section>
+
+<section>
+
+<h2>
+
+Vertical Edits
+
+</h2>
+
+<div class="grid">
+
+<div class="card">
+
+Vertical 01
+
+</div>
+
+<div class="card">
+
+Vertical 02
+
+</div>
+
+<div class="card">
+
+Vertical 03
+
+</div>
+
+</div>
+
+</section>
+
+<footer>
+
+END OF TRANSMISSION
+
+</footer>
 
 <script>
 
-/* 🔥 INTRO */
-const intro = document.getElementById("intro");
-const app = document.getElementById("app");
+const c=
+document
+.getElementById(
+"bg"
+);
 
-setTimeout(()=>{
-  intro.style.opacity="0";
-  intro.style.transition="2s ease";
-
-  setTimeout(()=>{
-    intro.remove();
-    app.style.display="block";
-    startExperience();
-  },2000);
-
-},3000);
-
-/* 🧭 scroll */
-function scrollToSection(id){
-  document.getElementById(id).scrollIntoView({behavior:"smooth"});
-}
-
-/* 🎥 modal */
-const modal=document.getElementById("modal");
-const video=modal.querySelector("video");
-
-function openVideo(){
-  modal.style.display="flex";
-  video.src="https://www.w3schools.com/html/mov_bbb.mp4"; // demo
-  video.play();
-}
-
-function closeVideo(){
-  modal.style.display="none";
-  video.pause();
-}
-
-/* 🌌 stars */
-const c=document.getElementById("bg");
-const ctx=c.getContext("2d");
+const ctx=
+c.getContext(
+"2d"
+);
 
 function resize(){
-  c.width=innerWidth;
-  c.height=innerHeight;
+
+c.width=
+innerWidth;
+
+c.height=
+innerHeight;
+
 }
+
 resize();
-window.addEventListener("resize",resize);
 
-let stars=Array.from({length:350},()=>({
-  x:Math.random()*innerWidth,
-  y:Math.random()*innerHeight,
-  s:Math.random()*2.5
-}));
+onresize=
+resize;
 
-let mouse={x:0,y:0};
+let stars=
+[
+...Array(
+450
+)
+]
 
-window.addEventListener("mousemove",e=>{
-  mouse.x=(e.clientX/innerWidth-0.5)*2;
-  mouse.y=(e.clientY/innerHeight-0.5)*2;
-});
+.map(
+()=>({
+
+x:
+Math.random()
+*c.width,
+
+y:
+Math.random()
+*c.height,
+
+s:
+Math.random()
+*3+1
+
+})
+);
 
 function draw(){
-  ctx.clearRect(0,0,c.width,c.height);
 
-  stars.forEach(st=>{
-    let px=mouse.x*st.s*4;
-    let py=mouse.y*st.s*4;
+ctx.clearRect(
 
-    ctx.fillStyle="#8ccfff";
-    ctx.fillRect(st.x+px,st.y+py,st.s,st.s);
+0,
 
-    st.y+=st.s*0.25;
+0,
 
-    if(st.y>c.height){
-      st.y=0;
-      st.x=Math.random()*c.width;
-    }
-  });
+c.width,
 
-  requestAnimationFrame(draw);
+c.height
+
+);
+
+stars.forEach(
+st=>{
+
+ctx.fillStyle=
+"#8ccfff";
+
+ctx.fillRect(
+
+st.x,
+
+st.y,
+
+st.s,
+
+st.s
+
+);
+
+st.y+=
+st.s
+*.15;
+
+if(
+st.y>
+c.height
+)
+
+st.y=0;
+
 }
 
-function startExperience(){
-  draw();
+);
+
+requestAnimationFrame(
+draw
+);
+
 }
+
+draw();
 
 </script>
 
 </body>
+
 </html>
