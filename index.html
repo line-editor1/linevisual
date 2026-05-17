@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <title>LINE | Video Editor</title>
 
 <style>
@@ -16,209 +15,116 @@ font-family:Arial,sans-serif;
 }
 
 body{
-
 background:
 radial-gradient(
 circle at top,
-#0b1730,
+#0a1630,
 #020510 60%
 );
-
 color:white;
-
 overflow-x:hidden;
-
 }
 
 canvas{
-
 position:fixed;
-
 inset:0;
-
 z-index:-3;
-
 }
 
 #hud{
-
 position:fixed;
-
 right:8px;
-
 top:0;
-
 width:4px;
-
 height:0;
-
 background:#8ccfff;
+box-shadow:0 0 25px #8ccfff;
+z-index:100;
+}
 
-box-shadow:
-0 0 20px #8ccfff;
+#intro{
+position:fixed;
+inset:0;
+background:#020510;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:999;
+animation:hideIntro 3s forwards;
+}
 
-z-index:50;
-
+.introText{
+font-size:28px;
+letter-spacing:4px;
+animation:pulse 1.5s infinite;
 }
 
 .hero{
-
 min-height:100vh;
-
 display:flex;
-
-justify-content:center;
-
 align-items:center;
-
+justify-content:center;
 padding:20px;
-
 text-align:center;
-
-position:relative;
-
 }
 
 .glass{
-
 background:
-rgba(
-255,
-255,
-255,
-.08
+linear-gradient(
+180deg,
+rgba(255,255,255,.16),
+rgba(255,255,255,.07)
 );
 
-backdrop-filter:
-blur(
-28px
-);
+backdrop-filter:blur(34px);
 
 border:
 1px solid
-rgba(
-255,
-255,
-255,
-.12
-);
+rgba(255,255,255,.18);
 
-border-radius:
-36px;
+padding:42px;
 
-padding:
-42px;
+border-radius:36px;
 
 box-shadow:
 
-0 10px 40px
-rgba(
-0,
-0,
-0,
-.25
-),
+0 10px 50px
+rgba(255,255,255,.03),
 
 inset 0 1px 0
-rgba(
-255,
-255,
-255,
-.1
-);
+rgba(255,255,255,.25);
 
 }
 
 .heroCard{
-
-max-width:
-850px;
-
-animation:
-float 7s
-ease-in-out infinite;
-
+max-width:820px;
+animation:float 7s infinite;
 }
 
 .logo{
-
-font-size:
-100px;
-
+font-size:100px;
 font-weight:bold;
-
-margin-bottom:
-10px;
 
 background:
 linear-gradient(
 90deg,
-#ffffff,
+white,
 #8ccfff
 );
 
 -webkit-background-clip:text;
-
--webkit-text-fill-color:
-transparent;
-
-position:relative;
-
-}
-
-.logo::after{
-
-content:"";
-
-position:absolute;
-
-left:0;
-
-bottom:-10px;
-
-width:100%;
-
-height:2px;
-
-background:
-linear-gradient(
-90deg,
-transparent,
-#8ccfff,
-transparent
-);
-
-animation:
-scan 3s infinite;
-
+-webkit-text-fill-color:transparent;
 }
 
 .subtitle{
-
+margin:20px 0;
 opacity:.8;
-
-margin-bottom:
-25px;
-
-font-size:
-18px;
-
 }
 
 .telegram{
-
 display:inline-block;
-
-padding:
-14px 24px;
-
-border-radius:
-18px;
-
-text-decoration:none;
-
-color:white;
-
+padding:14px 24px;
+border-radius:18px;
 background:
 rgba(
 120,
@@ -226,54 +132,24 @@ rgba(
 255,
 .15
 );
-
-transition:
-.3s;
-
-}
-
-.telegram:hover{
-
-transform:
-translateY(-3px);
-
-box-shadow:
-0 0 20px
-rgba(
-120,
-180,
-255,
-.3
-);
-
+text-decoration:none;
+color:white;
 }
 
 section{
-
-padding:
-90px 20px;
-
-position:relative;
-
-z-index:2;
-
+padding:90px 20px;
 }
 
 .sectionTitle{
-
-font-size:
-34px;
-
-margin-bottom:
-30px;
-
+font-size:32px;
+margin-bottom:25px;
 }
 
 .grid{
-
 display:grid;
 
 grid-template-columns:
+
 repeat(
 auto-fit,
 minmax(
@@ -282,235 +158,126 @@ minmax(
 )
 );
 
-gap:
-24px;
-
+gap:24px;
 }
 
 .card{
 
 background:
+linear-gradient(
+180deg,
 rgba(
 255,
 255,
 255,
-.06
+.18
+),
+
+rgba(
+255,
+255,
+255,
+.08
+)
 );
 
 backdrop-filter:
 blur(
-20px
+30px
 );
 
-border-radius:
-30px;
+border:
 
-padding:
-100px 20px;
+1px solid
+
+rgba(
+255,
+255,
+255,
+.22
+);
+
+padding:100px 20px;
+
+border-radius:32px;
 
 position:relative;
 
 overflow:hidden;
 
-transition:
-.45s;
+transition:.4s;
+
+}
+
+.card:hover{
+transform:
+translateY(-10px);
+}
+
+.reveal{
+opacity:0;
+transform:translateY(60px);
+transition:1s;
+}
+
+.show{
+opacity:1;
+transform:none;
+}
+
+#outro{
+padding:120px;
+text-align:center;
+opacity:.7;
+}
+
+#replay{
+
+padding:14px 22px;
+
+border:none;
+
+border-radius:18px;
+
+background:
+
+rgba(
+120,
+180,
+255,
+.12
+);
+
+color:white;
 
 cursor:pointer;
 
 }
 
-.card::before{
-
-content:"";
-
-position:absolute;
-
-inset:0;
-
-background:
-
-linear-gradient(
-120deg,
-
-transparent,
-
-rgba(
-255,
-255,
-255,
-.12
-),
-
-transparent
-
-);
-
+@keyframes float{
+50%{
 transform:
-translateX(
--100%
-);
-
-transition:
-1s;
-
-}
-
-.card:hover::before{
-
-transform:
-translateX(
-100%
-);
-
-}
-
-.card:hover{
-
-transform:
-
 translateY(
 -12px
-)
-
-rotateX(
-5deg
 );
-
-box-shadow:
-
-0 0 45px
-
-rgba(
-120,
-180,
-255,
-.25
-);
-
+}
 }
 
-.cardGlow{
-
-position:absolute;
-
-inset:-50%;
-
-background:
-radial-gradient(
-circle,
-rgba(
-120,
-180,
-255,
-.15
-),
-transparent 70%
-);
-
-opacity:0;
-
-transition:
-.4s;
-
-}
-
-.card:hover .cardGlow{
-
-opacity:1;
-
-}
-
-.reveal{
-
-opacity:0;
-
-transform:
-translateY(
-60px
-);
-
-transition:
-1s;
-
-}
-
-.show{
-
-opacity:1;
-
-transform:none;
-
-}
-
-footer{
-
-padding:
-90px;
-
-text-align:center;
-
-opacity:.6;
-
-}
-
-@keyframes float{
-
+@keyframes pulse{
 50%{
-
-transform:
-translateY(
--14px
-);
-
+opacity:.4;
+}
 }
 
-}
+@keyframes hideIntro{
 
-@keyframes scan{
-
-0%{
-
-transform:
-translateX(
--100%
-);
-
+80%{
+opacity:1;
 }
 
 100%{
-
-transform:
-translateX(
-100%
-);
-
-}
-
-}
-
-@media(
-max-width:700px
-){
-
-.logo{
-
-font-size:
-70px;
-
-}
-
-.glass{
-
-padding:
-28px;
-
-}
-
-.card{
-
-padding:
-80px 20px;
-
+opacity:0;
+visibility:hidden;
 }
 
 }
@@ -521,6 +288,12 @@ padding:
 
 <body>
 
+<div id="intro">
+<div class="introText">
+INITIALIZING VISUAL SYSTEM...
+</div>
+</div>
+
 <canvas id="space"></canvas>
 
 <div id="hud"></div>
@@ -530,16 +303,23 @@ padding:
 <div class="glass heroCard">
 
 <div class="logo">
-
 LINE
-
 </div>
 
 <div class="subtitle">
 
-Creative Video Editing • Motion • Short Form Content
+Видеомонтаж • Motion • Шортсы • Кинематографичный монтаж
 
 </div>
+
+<p>
+
+Создаю вертикальный и горизонтальный контент.
+Монтаж, атмосфера, динамика и визуал.
+
+</p>
+
+<br>
 
 <a
 href="https://t.me/line_editor"
@@ -556,27 +336,50 @@ Telegram
 <section class="reveal">
 
 <div class="sectionTitle">
+ОБО МНЕ
+</div>
 
-Horizontal Edits
+<div class="glass">
+
+Видео монтажёр.
+Работаю с вертикальными и горизонтальными роликами.
+
+</div>
+
+</section>
+
+<section class="reveal">
+
+<div class="sectionTitle">
+
+ЛУЧШАЯ РАБОТА
+
+</div>
+
+<div class="card">
+
+ТУТ БУДЕТ ГЛАВНЫЙ РОЛИК
+
+</div>
+
+</section>
+
+<section class="reveal">
+
+<div class="sectionTitle">
+
+ГОРИЗОНТАЛЬНЫЕ РОЛИКИ
 
 </div>
 
 <div class="grid">
 
 <div class="card">
-
-<div class="cardGlow"></div>
-
-Featured Edit
-
+Видео 1
 </div>
 
 <div class="card">
-
-<div class="cardGlow"></div>
-
-Project 02
-
+Видео 2
 </div>
 
 </div>
@@ -587,67 +390,83 @@ Project 02
 
 <div class="sectionTitle">
 
-Vertical Edits
+ВЕРТИКАЛЬНЫЕ РОЛИКИ
 
 </div>
 
 <div class="grid">
 
 <div class="card">
-
-<div class="cardGlow"></div>
-
-Vertical 01
-
+Видео
 </div>
 
 <div class="card">
-
-<div class="cardGlow"></div>
-
-Vertical 02
-
+Видео
 </div>
 
 <div class="card">
-
-<div class="cardGlow"></div>
-
-Vertical 03
-
+Видео
 </div>
 
 </div>
 
 </section>
 
-<footer>
+<section class="reveal">
+
+<div class="sectionTitle">
+КОНТАКТЫ
+</div>
+
+<div class="glass">
+
+Telegram:
+@line_editor
+
+<br><br>
+
+Портфолио:
+
+t.me/line_portfolio1
+
+</div>
+
+</section>
+
+<div id="outro">
 
 END OF TRANSMISSION
 
-</footer>
+<br><br>
+
+<button id="replay">
+
+Replay Experience
+
+</button>
+
+</div>
 
 <script>
 
+replay.onclick=
+()=>window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+
 const canvas=
-document
-.getElementById(
-"space"
-);
+space;
 
 const ctx=
-canvas.getContext(
-"2d"
-);
+canvas.getContext("2d");
 
 function resize(){
-
 canvas.width=
 innerWidth;
 
 canvas.height=
 innerHeight;
-
 }
 
 resize();
@@ -660,22 +479,15 @@ let mouse=0;
 addEventListener(
 "mousemove",
 e=>{
-
 mouse=
 e.clientX
 /
 innerWidth;
-
 }
 );
 
 const stars=
-
-[
-...Array(
-900
-)
-]
+[...Array(1200)]
 
 .map(
 ()=>({
@@ -718,13 +530,10 @@ s.z
 );
 
 s.y+=
-s.z
-*.16;
+s.z*.18;
 
 s.x+=
-mouse
-*.04
-*s.z;
+mouse*.04*s.z;
 
 if(
 s.y>
@@ -744,25 +553,45 @@ Math.random()
 
 if(
 Math.random()
->.995
+>.999
 ){
+
+let x=
+Math.random()
+*canvas.width;
+
+let y=
+Math.random()
+*250;
+
+let d=
+Math.random()
+>.5?1:-1;
+
+let l=
+80+
+Math.random()
+*140;
 
 ctx.beginPath();
 
 ctx.moveTo(
-0,
-80
+x,
+y
 );
 
 ctx.lineTo(
-160,
-95
+x-l*d,
+y+l*.5
 );
 
 ctx.strokeStyle=
-"#8ccfff";
-
-ctx.lineWidth=2;
+"rgba(
+140,
+207,
+255,
+.8
+)";
 
 ctx.stroke();
 
@@ -795,11 +624,7 @@ innerHeight
 
 )
 
-*100
-
-+
-
-"%";
+*100+"%";
 
 document
 .querySelectorAll(
