@@ -244,10 +244,10 @@ let audioContext, lastScroll = 0, inertia = 0;
 const canvas = document.getElementById('space'), ctx = canvas.getContext('2d');
 let stars = [], comets = [];
 
-function unlockAudio() { if (!audioContext) audioContext = new (window.AudioContext  window.webkitAudioContext)(); }
+function unlockAudio() { if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)(); }
 
 function sfxHover() {
-    if (!document.getElementById('soundToggle').checked  !audioContext) return;
+    if (!document.getElementById('soundToggle').checked || !audioContext) return;
     const osc = audioContext.createOscillator();
     const gain = audioContext.createGain();
     osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioContext.currentTime);
@@ -266,7 +266,7 @@ function initLoader() {
         p += Math.floor(Math.random()*4)+1;
         if(p >= 100) { p=100; clearInterval(iv); document.getElementById('loader-ui').style.opacity='0'; setTimeout(()=>document.getElementById('start-btn').style.display='block',500); }
         fill.style.width = p+"%"; txt.innerText = p+"%";
-        log.innerText = logs[Math.floor(p/30)]  "READY";
+        log.innerText = logs[Math.floor(p/30)] || "READY";
     }, 40);
 }
 window.onload = initLoader;
@@ -325,7 +325,7 @@ function checkStatus() {
     let ok = false;
     if (day === 1 && t >= 15.5 && t < 21) ok = true;
     else if (day >= 2 && day <= 5 && h >= 15 && h < 21) ok = true;
-    else if ((day === 0  day === 6) && h >= 12 && h < 21) ok = true;
+    else if ((day === 0 || day === 6) && h >= 12 && h < 21) ok = true;
     document.getElementById('online-dot').className = ok ? 'status-dot online' : 'status-dot';
 }
 </script>
