@@ -240,129 +240,94 @@ video { border-radius: 18px; object-fit: cover; background: #111; border: 1px so
 </div>
 
 <script>
+let audioContext, lastScroll = 0, inertia = 0;
 const canvas = document.getElementById('space'), ctx = canvas.getContext('2d');
-let stars = [], comets = [], mouseX = 0, mouseY = 0, targetX = 0, targetY = 0, lastScroll = 0;
+let stars = [], comets = [];
 
-function haptic() { if(navigator.vibrate) navigator.vibrate(15); }
+function unlockAudio() { if (!audioContext) audioContext = new (window.AudioContext  window.webkitAudioContext)(); }
 
-// ГЛАВНАЯ ЛОГИКА ВИДЕО (Автозапуск при наведении и выключение других)
-const allVideos = document.querySelectorAll('.v-video');
+function sfxHover() {
+    if (!document.getElementById('soundToggle').checked  !audioContext) return;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioContext.currentTime);
+    gain.gain.setValueAtTime(0.015, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+    osc.connect(gain); gain.connect(audioContext.destination);
+    osc.start(); osc.stop(audioContext.currentTime + 0.1);
+    if(document.getElementById('hapticToggle').checked && navigator.vibrate) navigator.vibrate(5);
+}
 
-allVideos.forEach(video => {
-    // Когда наводим мышку (ПК)
-    video.parentElement.addEventListener('mouseenter', () => {
-        allVideos.forEach(otherVideo => {
-            if (otherVideo !== video) {
-                otherVideo.pause();
-                otherVideo.currentTime = 0; // Возвращаем в начало
-                otherVideo.parentElement.classList.remove('is-playing');
-            }
-        });
-        video.play().catch(() => console.log("Нужен клик для звука"));
-        video.parentElement.classList.add('is-playing');
-        document.getElementById('portfolio').classList.add('focus-active');
-        haptic();
-    });
-
-    // Когда убираем мышку (ПК)
-    video.parentElement.addEventListener('mouseleave', () => {
-        video.pause();
-        video.parentElement.classList.remove('is-playing');
-        document.getElementById('portfolio').classList.remove('focus-active');
-    });
-
-    // Для мобилок (запуск по клику)
-    video.addEventListener('click', () => {
-        if (video.paused) {
-            allVideos.forEach(v => { v.pause(); v.parentElement.classList.remove('is-playing'); });
-            video.play();
-            video.parentElement.classList.add('is-playing');
-        } else {
-            video.pause();
-            video.parentElement.classList.remove('is-playing');
-        }
-    });
-});
-
-// ЛОГИКА ЗАГРУЗКИ (Loader)
 function initLoader() {
     let p = 0;
-    const fill = document.getElementById('loader-fill');
+    const fill = document.getElementById('loader-fill'), txt = document.getElementById('percent'), log = document.getElementById('loader-log');
+    const logs = ["CONNECTING...", "SYNCING...", "LOADING...", "READY"];
     const iv = setInterval(() => {
         p += Math.floor(Math.random()*4)+1;
-        if(p >= 100) { 
-            clearInterval(iv); 
-            document.getElementById('loader-ui').style.opacity='0'; 
-            setTimeout(()=>document.getElementById('start-btn').style.display='block',500); 
-        }
-        fill.style.width = p+"%";
+        if(p >= 100) { p=100; clearInterval(iv); document.getElementById('loader-ui').style.opacity='0'; setTimeout(()=>document.getElementById('start-btn').style.display='block',500); }
+        fill.style.width = p+"%"; txt.innerText = p+"%";
+        log.innerText = logs[Math.floor(p/30)]  "READY";
     }, 40);
 }
 window.onload = initLoader;
 
 function startExperience() {
-    haptic();
+    unlockAudio();
     document.getElementById('gate').style.opacity = '0';
     setTimeout(() => {
         document.getElementById('gate').style.display = 'none';
         document.getElementById('main-content').style.opacity = '1';
         document.getElementById('main-content').style.pointerEvents = 'all';
         runTimeline();
+        checkStatus();
     }, 800);
 }
 
 async function runTimeline() {
     const d = (ms) => new Promise(r => setTimeout(r, ms));
-    for(let i=1; i<=4; i++) {
-        document.getElementById('st'+i).classList.add('active');
+    const steps = [1,2,3,4].map(i => document.getElementById('st'+i));
+    const segs = [1,2,3].map(i => document.getElementById('seg'+i));
+    for(let i=0; i<4; i++) {
+        steps[i].classList.add('active');
         await d(1000);
-        if(i < 4) { document.getElementById('seg'+i).style.width = '33.33%'; await d(800); }
+        if(segs[i]) { segs[i].style.width = '33.33%'; await d(800); }
     }
 }
 
-// 3D ЭФФЕКТ И ЗВЕЗДЫ
-document.addEventListener('mousemove', (e) => {
-    targetX = (e.clientX - window.innerWidth / 2) * 0.05;
-    targetY = (e.clientY - window.innerHeight / 2) * 0.05;
-});
+function toggleSchedule() { document.getElementById('schedule-modal').classList.toggle('active'); }
 
 function resize() {
-    canvas.width = window.innerWidth + 200; canvas.height = window.innerHeight + 200;
-    stars = [];
-    for(let i=0; i<600; i++) stars.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, z:Math.random()*1.5, o:Math.random(), d:Math.random()*0.7});
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    stars = []; 
+    // ТЕПЕРЬ 800 ЗВЕЗД
+    for(let i=0; i<800; i++) stars.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, z:Math.random()*1.2, o:Math.random()});
 }
 window.onresize = resize; resize();
 
 function animate() {
     ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width, canvas.height);
-    mouseX += (targetX - mouseX) * 0.05;
-    mouseY += (targetY - mouseY) * 0.05;
-    let inertia = Math.abs(window.pageYOffset - lastScroll) * 0.15;
-    lastScroll = window.pageYOffset;
+    let currentScroll = window.pageYOffset;
+    inertia = Math.abs(currentScroll - lastScroll) * 0.1;
+    lastScroll = currentScroll;
 
     stars.forEach(s => {
-        let dx = s.x + (mouseX * s.d);
-        let dy = s.y + (mouseY * s.d);
         s.y -= (0.2 + inertia);
         if(s.y < 0) s.y = canvas.height;
         ctx.fillStyle = `rgba(255,255,255,${s.o})`;
-        ctx.beginPath(); ctx.arc(dx, dy, s.z, 0, Math.PI*2); ctx.fill();
-    });
-
-    if (Math.random() < 0.003) comets.push({x: Math.random()*canvas.width, y:-50, vx:(Math.random()-0.5)*10, vy:Math.random()*15+5, d: Math.random()});
-    comets.forEach((c, i) => {
-        c.x += c.vx; c.y += c.vy;
-        let dx = c.x + (mouseX * c.d);
-        let dy = c.y + (mouseY * c.d);
-        let g = ctx.createLinearGradient(dx, dy, dx-c.vx*3, dy-c.vy*3);
-        g.addColorStop(0, '#fff'); g.addColorStop(1, 'transparent');
-        ctx.strokeStyle = g; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(dx, dy); ctx.lineTo(dx-c.vx*3, dy-c.vy*3); ctx.stroke();
-        if(c.y > canvas.height + 100) comets.splice(i, 1);
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.z, 0, Math.PI*2); ctx.fill();
     });
     requestAnimationFrame(animate);
 }
 animate();
+
+function checkStatus() {
+    const now = new Date(), day = now.getDay(), h = now.getHours(), t = h + now.getMinutes()/60;
+    let ok = false;
+    if (day === 1 && t >= 15.5 && t < 21) ok = true;
+    else if (day >= 2 && day <= 5 && h >= 15 && h < 21) ok = true;
+    else if ((day === 0  day === 6) && h >= 12 && h < 21) ok = true;
+    document.getElementById('online-dot').className = ok ? 'status-dot online' : 'status-dot';
+}
 </script>
 </body>
 </html>
