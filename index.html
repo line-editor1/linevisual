@@ -2,606 +2,332 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LINE | Video Editor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>LINE | Visual Craft</title>
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
+:root {
+    --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    --glass: rgba(255, 255, 255, 0.04);
+    --liquid-glass: rgba(255, 255, 255, 0.07);
+    --border: rgba(255, 255, 255, 0.1);
+    --accent: #34c759;
+    --offline: #ff3b30;
 }
 
-body{
-background:radial-gradient(circle at top,#0b1730,#020510 60%);
-color:white;
-overflow-x:hidden;
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #fff; border-radius: 10px; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--apple-font); -webkit-tap-highlight-color: transparent; }
+body { background: #000; color: white; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+/* НАСТРОЙКИ */
+#settings-btn { position: fixed; top: 20px; right: 20px; z-index: 1001; cursor: pointer; opacity: 0.5; transition: 0.3s; }
+#settings-panel {
+    position: fixed; top: 70px; right: 20px; width: 220px; background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(30px); border: 1px solid var(--border); border-radius: 20px;
+    padding: 20px; z-index: 1000; transform: translateX(300px); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#settings-panel.active { transform: translateX(0); }
+.setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 13px; }
+
+/* ПЕРЕКЛЮЧАТЕЛЬ APPLE */
+.switch { position: relative; width: 34px; height: 18px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; inset: 0; background: #333; border-radius: 20px; transition: .4s; }
+.slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background: var(--accent); }
+input:checked + .slider:before { transform: translateX(16px); }
+
+/* ГЕЙТ */
+#gate { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 1s; padding: 20px; }
+.loader-wrap { width: 100%; max-width: 240px; text-align: center; }
+.loader-bar-bg { width: 100%; height: 2px; background: rgba(255,255,255,0.1); margin: 20px 0; position: relative; overflow: hidden; }
+#loader-fill { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: #fff; box-shadow: 0 0 15px #fff; }
+#loader-log { font-size: 9px; margin-top: 10px; opacity: 0.3; letter-spacing: 2px; text-transform: uppercase; }
+#start-btn { 
+    display: none; padding: 16px 40px; background: none; border: 1px solid #fff; color: #fff; 
+    letter-spacing: 4px; cursor: pointer; transition: 0.4s; font-size: 10px; border-radius: 50px;
 }
 
-canvas{
-position:fixed;
-inset:0;
-z-index:-3;
+#main-content { opacity: 0; transition: 1.5s; pointer-events: none; width: 100%; }
+canvas { position: fixed; inset: 0; z-index: -3; pointer-events: none; }
+
+section { max-width: 1000px; margin: auto; padding: 40px 20px; position: relative; width: 100%; }
+.section-label { font-size: 9px; letter-spacing: 4px; opacity: 0.3; margin-bottom: 25px; display: block; text-transform: uppercase; }
+
+/* ЛОГОТИП */
+.logo-container { display: flex; flex-direction: column; align-items: center; gap: 15px; margin: 30px 0; }
+.apple-lines { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.l-line { height: 2px; background: #fff; border-radius: 2px; }
+.l-1 { width: 50px; } .l-2 { width: 30px; opacity: 0.5; }
+.logo-text { font-size: clamp(30px, 10vw, 45px); font-weight: 200; letter-spacing: 15px; text-indent: 15px; }
+
+.about-box { padding: 30px 20px; text-align: center; font-size: 16px; font-weight: 200; line-height: 1.6; margin-bottom: 40px; background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 20px; }
+
+/* ТАЙМЛАЙН */
+.process-container { margin: 30px auto 50px; position: relative; height: 40px; width: 100%; display: flex; align-items: center; }
+.timeline-track { position: absolute; left: 0; right: 0; height: 2px; background: var(--border); z-index: 1; }
+.timeline-segment { position: absolute; height: 2px; background: var(--accent); z-index: 2; width: 0; transition: width 1s linear; }
+.steps-row { display: flex; justify-content: space-between; width: 100%; position: relative; z-index: 3; }
+.step { display: flex; flex-direction: column; align-items: center; position: relative; width: 12px; }
+.step-dot { width: 10px; height: 10px; background: #000; border: 2px solid var(--border); border-radius: 50%; transition: 0.3s; }
+.step-label { font-size: 7px; letter-spacing: 1px; opacity: 0.2; position: absolute; top: 22px; white-space: nowrap; transition: 0.3s; }
+.step.active .step-dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+.step.active .step-label { opacity: 1; color: var(--accent); }
+
+/* ГРИДЫ */
+.focus-wrap:hover .focus-target:not(:hover) { opacity: 0.2; filter: blur(8px); }
+.focus-target { transition: 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+.grid-3, .v-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+
+.skill-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 18px; padding: 20px 10px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.skill-card svg { width: 22px; height: 22px; stroke: white; fill: none; stroke-width: 1.5; }
+.skill-card span { font-size: 11px; letter-spacing: 1px; font-weight: 300; }
+
+video { border-radius: 18px; object-fit: cover; background: #111; border: 1px solid var(--border); width: 100%; display: block; }
+.v-video { aspect-ratio: 9/16; } 
+.h-video { aspect-ratio: 16/9; }
+
+/* MODAL LIQUID GLASS */
+#schedule-modal {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
+    width: 90%; max-width: 320px; padding: 35px 25px; background: var(--liquid-glass);
+    backdrop-filter: blur(80px) saturate(200%); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 35px; z-index: 2000; opacity: 0; pointer-events: none; 
+    transition: 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+#schedule-modal.active { opacity: 1; pointer-events: all; transform: translate(-50%, -50%) scale(1); }
+.modal-close { position: absolute; top: 15px; right: 20px; cursor: pointer; opacity: 0.3; font-size: 20px; }
+
+.contact-header { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 25px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--offline); position: relative; }
+.status-dot.online { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+.contact-link { text-decoration: none; color: white; padding: 30px 10px; display: flex; flex-direction: column; align-items: center; gap: 12px; background: var(--glass); border: 1px solid var(--border); border-radius: 20px; }
+.contact-icon { width: 28px; height: 28px; fill: white; }
+
+/* MOBILE FIXES (Улучшенная адаптация) */
+@media (max-width: 768px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .v-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    section { padding: 30px 15px; }
+    .logo-text { letter-spacing: 10px; text-indent: 10px; }
+    .focus-wrap:hover .focus-target:not(:hover) { opacity: 1; filter: none; }
 }
 
-#hud{
-position:fixed;
-right:8px;
-top:0;
-width:4px;
-height:0;
-background:#8ccfff;
-box-shadow:0 0 20px #8ccfff;
-z-index:50;
-}
-
-#intro{
-position:fixed;
-inset:0;
-background:#020510;
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:9999;
-animation:hideIntro 3s forwards;
-}
-
-.introText{
-font-size:26px;
-letter-spacing:4px;
-animation:pulse 1.5s infinite;
-}
-
-.hero{
-min-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-padding:20px;
-text-align:center;
-}
-
-.glass{
-background:linear-gradient(
-180deg,
-rgba(255,255,255,.16),
-rgba(255,255,255,.07)
-);
-
-backdrop-filter:blur(34px);
-
-border:1px solid rgba(255,255,255,.18);
-
-border-radius:36px;
-
-padding:42px;
-
-box-shadow:
-0 10px 50px rgba(255,255,255,.03),
-inset 0 1px 0 rgba(255,255,255,.25);
-}
-
-.logo{
-font-size:100px;
-font-weight:bold;
-
-background:
-linear-gradient(
-90deg,
-white,
-#8ccfff
-);
-
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-}
-
-.subtitle{
-margin:20px 0;
-opacity:.8;
-}
-
-.telegram{
-display:inline-block;
-padding:14px 24px;
-border-radius:18px;
-background:rgba(120,180,255,.15);
-text-decoration:none;
-color:white;
-}
-
-section{
-padding:90px 20px;
-}
-
-.sectionTitle{
-font-size:32px;
-margin-bottom:25px;
-}
-
-.grid{
-display:grid;
-grid-template-columns:
-repeat(auto-fit,minmax(260px,1fr));
-gap:24px;
-}
-
-.card{
-
-width:100%;
-
-background:
-linear-gradient(
-180deg,
-rgba(255,255,255,.18),
-rgba(255,255,255,.08)
-);
-
-backdrop-filter:blur(30px);
-
-border:
-1px solid rgba(255,255,255,.22);
-
-border-radius:32px;
-
-overflow:hidden;
-
-transition:.4s;
-
-}
-
-.card:hover{
-transform:translateY(-10px);
-}
-
-video{
-width:100%;
-display:block;
-border-radius:32px;
-}
-
-.reveal{
-opacity:0;
-transform:translateY(60px);
-transition:1s;
-}
-
-.show{
-opacity:1;
-transform:none;
-}
-
-#outro{
-padding:120px;
-text-align:center;
-opacity:.7;
-}
-
-#replay{
-padding:14px 22px;
-border:none;
-border-radius:18px;
-background:rgba(120,180,255,.12);
-color:white;
-cursor:pointer;
-}
-
-#cinema{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.92);
-display:none;
-justify-content:center;
-align-items:center;
-z-index:99999;
-backdrop-filter:blur(20px);
-}
-
-#cinema video{
-max-width:90%;
-max-height:90%;
-}
-
-#closeCinema{
-position:absolute;
-top:30px;
-right:30px;
-font-size:40px;
-cursor:pointer;
-}
-
-@keyframes pulse{
-50%{opacity:.4;}
-}
-
-@keyframes hideIntro{
-80%{opacity:1;}
-100%{
-opacity:0;
-visibility:hidden;
-}
+@media (max-width: 480px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .v-grid { grid-template-columns: 1fr; }
+    .skill-card { padding: 15px 5px; }
+    .step-label { font-size: 6px; top: 20px; }
+    .about-box { font-size: 14px; padding: 20px 15px; }
 }
 </style>
 </head>
-
 <body>
 
-<div id="intro">
-<div class="introText">
-INITIALIZING VISUAL SYSTEM...
-</div>
-</div>
-
-<canvas id="space"></canvas>
-
-<div id="hud"></div>
-
-<div id="cinema">
-<video id="cinemaVideo" controls></video>
-<div id="closeCinema">✕</div>
+<div id="settings-btn" onclick="document.getElementById('settings-panel').classList.toggle('active')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></div>
+<div id="settings-panel">
+    <div class="setting-item"><span>Звук</span><label class="switch"><input type="checkbox" id="soundToggle" checked><span class="slider"></span></label></div>
+    <div class="setting-item"><span>Анимация</span><label class="switch"><input type="checkbox" id="animToggle" checked><span class="slider"></span></label></div>
+    <div class="setting-item"><span>Вибро</span><label class="switch"><input type="checkbox" id="hapticToggle" checked><span class="slider"></span></label></div>
 </div>
 
-<section class="hero">
-
-<div class="glass">
-
-<div class="logo">
-LINE
+<div id="gate">
+    <div class="loader-wrap" id="loader-ui">
+        <div style="display:flex; justify-content:space-between; font-size:10px; letter-spacing:1px"><span>INITIALIZING</span><span id="percent">0%</span></div>
+        <div class="loader-bar-bg"><div id="loader-fill"></div></div>
+        <div id="loader-log">CONNECTING TO CORE...</div>
+    </div>
+    <button id="start-btn" onclick="startExperience()">ENTER SYSTEM</button>
 </div>
 
-<div class="subtitle">
+<div id="main-content">
+    <canvas id="space"></canvas>
 
-Видеомонтаж • Motion • Шортсы • Кинематографичный монтаж
+    <section>
+        <div class="logo-container">
+            <div class="apple-lines"><div class="l-line l-1"></div><div class="l-line l-2"></div></div>
+            <h1 class="logo-text">LINE</h1>
+        </div>
+        <div class="section-label">О себе</div>
+        <div class="about-box">Создаю визуальный контент, который меняет восприятие. Мой подход — это симбиоз технологий, ритма и чистого творчества.</div>
+        
+        <div class="process-container">
+            <div class="timeline-track"></div>
+            <div id="seg1" class="timeline-segment" style="left:0; max-width:33.33%"></div>
+            <div id="seg2" class="timeline-segment" style="left:33.33%; max-width:33.33%"></div>
+            <div id="seg3" class="timeline-segment" style="left:66.66%; max-width:33.33%"></div>
+            <div class="steps-row">
+                <div class="step" id="st1"><div class="step-dot"></div><span class="step-label">ИДЕЯ</span></div>
+                <div class="step" id="st2"><div class="step-dot"></div><span class="step-label">МОНТАЖ</span></div>
+                <div class="step" id="st3"><div class="step-dot"></div><span class="step-label">ЦВЕТ</span></div>
+                <div class="step" id="st4"><div class="step-dot"></div><span class="step-label">РЕНДЕР</span></div>
+            </div>
+        </div>
+    </section>
 
+    <section>
+        <span class="section-label">Навыки</span>
+        <div class="grid-3 focus-wrap">
+            <div class="skill-card focus-target" onmouseenter="sfxHover()">
+                <svg viewBox="0 0 24 24"><path d="M2 6h20M2 12h14M2 18h18"/></svg><span>Монтаж</span>
+            </div>
+            <div class="skill-card focus-target" onmouseenter="sfxHover()">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0 0 20z" opacity="0.3" fill="white"/></svg><span>Цветокор</span>
+            </div>
+            <div class="skill-card focus-target" onmouseenter="sfxHover()">
+                <svg viewBox="0 0 24 24"><path d="M12 1v22M5 8v8M19 8v8"/></svg><span>Саунд</span>
+            </div>
+            <div class="skill-card focus-target" onmouseenter="sfxHover()">
+                <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg><span>Графика</span>
+            </div>
+            <div class="skill-card focus-target" onmouseenter="sfxHover()">
+                <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span>Motion</span>
+            </div>
+            <div class="skill-card focus-target" onmouseenter="sfxHover()">
+                <svg viewBox="0 0 24 24"><path d="M4 7V4h16v3M12 4v16"/></svg><span>Текст</span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <span class="section-label">Портфолио</span>
+        <div class="focus-wrap">
+            <div class="v-grid">
+                <video class="v-video focus-target" controls onmouseenter="sfxHover()"><source src="v1.mp4"></video>
+                <video class="v-video focus-target" controls onmouseenter="sfxHover()"><source src="v2.mp4"></video>
+                <video class="v-video focus-target" controls onmouseenter="sfxHover()"><source src="v3.mp4"></video>
+            </div>
+            <div class="grid-2" style="margin-top:15px">
+                <video class="h-video focus-target" controls onmouseenter="sfxHover()"><source src="h1.mp4"></video>
+                <video class="h-video focus-target" controls onmouseenter="sfxHover()"><source src="h2.mp4"></video>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="contact-header" onclick="toggleSchedule()">
+            <span class="section-label" style="margin:0">Связь (График работы)</span>
+            <div class="status-dot" id="online-dot"></div>
+        </div>
+        <div class="grid-2 focus-wrap">
+            <a href="https://t.me/line_editor" class="contact-link focus-target" onmouseenter="sfxHover()">
+                <svg class="contact-icon" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.891 8.146l-1.703 8.026c-.128.574-.47.712-.95.441l-2.597-1.914-1.253 1.205c-.138.138-.255.255-.521.255l.186-2.642 4.807-4.344c.209-.186-.045-.289-.323-.104l-5.94 3.739-2.559-.799c-.557-.174-.567-.557.116-.823l10.003-3.856c.464-.171.869.106.734.816z"/></svg>
+                <span>TELEGRAM</span>
+            </a>
+            <a href="https://t.me/line_portfolio1" class="contact-link focus-target" onmouseenter="sfxHover()">
+                <svg class="contact-icon" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                <span>PORTFOLIO</span>
+            </a>
+        </div>
+    </section>
 </div>
 
-<p>
-
-Создаю вертикальный и горизонтальный контент.
-Монтаж, атмосфера, динамика и визуал.
-
-</p>
-
-<br>
-
-<a
-href="https://t.me/line_editor"
-class="telegram">
-
-Telegram
-
-</a>
-
-</div>
-
-</section>
-
-<section class="reveal">
-
-<div class="sectionTitle">
-ОБО МНЕ
-</div>
-
-<div class="glass">
-
-Видео монтажёр.
-Работаю с вертикальными и горизонтальными роликами.
-
-</div>
-
-</section>
-
-<section class="reveal">
-
-<div class="sectionTitle">
-ЛУЧШАЯ РАБОТА
-</div>
-
-<video
-autoplay
-muted
-loop
-playsinline
-controls
-class="card">
-
-<source
-src="featured.mp4"
-type="video/mp4">
-
-</video>
-
-</section>
-
-<section class="reveal">
-
-<div class="sectionTitle">
-ГОРИЗОНТАЛЬНЫЕ РОЛИКИ
-</div>
-
-<div class="grid">
-
-<video controls class="card">
-<source src="horizontal1.mp4">
-</video>
-
-<video controls class="card">
-<source src="horizontal2.mp4">
-</video>
-
-</div>
-
-</section>
-
-<section class="reveal">
-
-<div class="sectionTitle">
-ВЕРТИКАЛЬНЫЕ РОЛИКИ
-</div>
-
-<div class="grid">
-
-<video controls class="card">
-<source src="vertical1.mp4">
-</video>
-
-<video controls class="card">
-<source src="vertical2.mp4">
-</video>
-
-<video controls class="card">
-<source src="vertical3.mp4">
-</video>
-
-</div>
-
-</section>
-
-<section class="reveal">
-
-<div class="sectionTitle">
-КОНТАКТЫ
-</div>
-
-<div class="glass">
-
-Telegram:
-@line_editor
-
-<br><br>
-
-Портфолио:
-
-t.me/line_portfolio1
-
-</div>
-
-</section>
-
-<div id="outro">
-
-END OF TRANSMISSION
-
-<br><br>
-
-<button id="replay">
-
-Replay Experience
-
-</button>
-
+<div id="schedule-modal">
+    <div class="modal-close" onclick="toggleSchedule()">✕</div>
+    <h3 style="margin-bottom:20px; font-weight:300; letter-spacing:1px; font-size:18px">График работы</h3>
+    <div style="font-size:13px; opacity:0.8; line-height:2.2; font-weight:200">
+        ПН: 15:30 — 21:00<br>
+        ВТ-ПТ: 15:00 — 21:00<br>
+        СБ-ВС: 12:00 — 21:00
+    </div>
 </div>
 
 <script>
+let audioContext, lastScroll = 0, inertia = 0;
+const canvas = document.getElementById('space'), ctx = canvas.getContext('2d');
+let stars = [], comets = [];
 
-replay.onclick=
-()=>window.scrollTo({
-top:0,
-behavior:"smooth"
-});
+function unlockAudio() { if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)(); }
 
-const canvas=space;
-const ctx=canvas.getContext("2d");
-
-function resize(){
-canvas.width=innerWidth;
-canvas.height=innerHeight;
+function sfxHover() {
+    if (!document.getElementById('soundToggle').checked || !audioContext) return;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioContext.currentTime);
+    gain.gain.setValueAtTime(0.015, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+    osc.connect(gain); gain.connect(audioContext.destination);
+    osc.start(); osc.stop(audioContext.currentTime + 0.1);
+    if(document.getElementById('hapticToggle').checked && navigator.vibrate) navigator.vibrate(5);
 }
 
-resize();
-
-onresize=resize;
-
-let mouse=0;
-let mx=0;
-let my=0;
-
-addEventListener(
-"mousemove",
-e=>{
-mouse=e.clientX/innerWidth;
-mx=e.clientX;
-my=e.clientY;
+function initLoader() {
+    let p = 0;
+    const fill = document.getElementById('loader-fill'), txt = document.getElementById('percent'), log = document.getElementById('loader-log');
+    const logs = ["CONNECTING...", "SYNCING...", "LOADING...", "READY"];
+    const iv = setInterval(() => {
+        p += Math.floor(Math.random()*4)+1;
+        if(p >= 100) { p=100; clearInterval(iv); document.getElementById('loader-ui').style.opacity='0'; setTimeout(()=>document.getElementById('start-btn').style.display='block',500); }
+        fill.style.width = p+"%"; txt.innerText = p+"%";
+        log.innerText = logs[Math.floor(p/30)] || "READY";
+    }, 40);
 }
-);
+window.onload = initLoader;
 
-const stars=
-[...Array(1200)]
-.map(
-()=>({
-x:Math.random()*canvas.width,
-y:Math.random()*canvas.height,
-z:Math.random()*3+1
-})
-);
-
-function draw(){
-
-ctx.clearRect(
-0,0,
-canvas.width,
-canvas.height
-);
-
-ctx.beginPath();
-
-ctx.arc(
-canvas.width*.7,
-canvas.height*.2,
-220,
-0,
-7
-);
-
-ctx.fillStyle=
-"rgba(120,180,255,.03)";
-
-ctx.fill();
-
-ctx.beginPath();
-
-ctx.arc(
-mx,my,
-40,
-0,7
-);
-
-ctx.fillStyle=
-"rgba(140,207,255,.04)";
-
-ctx.fill();
-
-stars.forEach(
-s=>{
-
-ctx.fillStyle="#8ccfff";
-
-ctx.fillRect(
-s.x,s.y,
-s.z,s.z
-);
-
-s.y+=s.z*.18;
-
-s.x+=mouse*.04*s.z;
-
-if(s.y>canvas.height){
-s.y=0;
-s.x=Math.random()*canvas.width;
+function startExperience() {
+    unlockAudio();
+    document.getElementById('gate').style.opacity = '0';
+    setTimeout(() => {
+        document.getElementById('gate').style.display = 'none';
+        document.getElementById('main-content').style.opacity = '1';
+        document.getElementById('main-content').style.pointerEvents = 'all';
+        runTimeline();
+        checkStatus();
+    }, 800);
 }
 
-}
-);
-
-if(Math.random()>.999){
-
-let x=Math.random()*canvas.width;
-
-let y=Math.random()*250;
-
-let d=Math.random()>.5?1:-1;
-
-let l=80+Math.random()*140;
-
-ctx.beginPath();
-
-ctx.moveTo(x,y);
-
-ctx.lineTo(
-x-l*d,
-y+l*.5
-);
-
-ctx.strokeStyle=
-"rgba(140,207,255,.8)";
-
-ctx.stroke();
-
+async function runTimeline() {
+    const d = (ms) => new Promise(r => setTimeout(r, ms));
+    const steps = [1,2,3,4].map(i => document.getElementById('st'+i));
+    const segs = [1,2,3].map(i => document.getElementById('seg'+i));
+    for(let i=0; i<4; i++) {
+        steps[i].classList.add('active');
+        await d(1000);
+        if(segs[i]) { segs[i].style.width = '33.33%'; await d(800); }
+    }
 }
 
-requestAnimationFrame(draw);
+function toggleSchedule() { document.getElementById('schedule-modal').classList.toggle('active'); }
 
+function resize() {
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    stars = []; 
+    // ТЕПЕРЬ 800 ЗВЕЗД
+    for(let i=0; i<800; i++) stars.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, z:Math.random()*1.2, o:Math.random()});
 }
+window.onresize = resize; resize();
 
-draw();
+function animate() {
+    ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width, canvas.height);
+    let currentScroll = window.pageYOffset;
+    inertia = Math.abs(currentScroll - lastScroll) * 0.1;
+    lastScroll = currentScroll;
 
-document
-.querySelectorAll(
-"video"
-)
-
-.forEach(
-v=>{
-
-v.onclick=
-()=>{
-
-cinema.style.display=
-"flex";
-
-cinemaVideo.src=
-v.currentSrc;
-
-};
-
+    stars.forEach(s => {
+        s.y -= (0.2 + inertia);
+        if(s.y < 0) s.y = canvas.height;
+        ctx.fillStyle = `rgba(255,255,255,${s.o})`;
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.z, 0, Math.PI*2); ctx.fill();
+    });
+    requestAnimationFrame(animate);
 }
-);
+animate();
 
-closeCinema.onclick=
-()=>{
-
-cinema.style.display=
-"none";
-
-cinemaVideo.pause();
-
-};
-
-addEventListener(
-"scroll",
-()=>{
-
-hud.style.height=
-
-(
-scrollY
-/
-(
-document.body.scrollHeight
--
-innerHeight
-)
-
-)
-
-*100+"%";
-
-document
-.querySelectorAll(
-".reveal"
-)
-
-.forEach(
-el=>{
-
-if(
-el.getBoundingClientRect().top
-<
-innerHeight*.85
-)
-
-el.classList.add(
-"show"
-);
-
+function checkStatus() {
+    const now = new Date(), day = now.getDay(), h = now.getHours(), t = h + now.getMinutes()/60;
+    let ok = false;
+    if (day === 1 && t >= 15.5 && t < 21) ok = true;
+    else if (day >= 2 && day <= 5 && h >= 15 && h < 21) ok = true;
+    else if ((day === 0 || day === 6) && h >= 12 && h < 21) ok = true;
+    document.getElementById('online-dot').className = ok ? 'status-dot online' : 'status-dot';
 }
-);
-
-}
-);
-
 </script>
-
 </body>
 </html>
